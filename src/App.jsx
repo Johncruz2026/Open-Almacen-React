@@ -1,55 +1,57 @@
-// Importa useState para manejar datos del formulario
+// Importar useState
 import { useState } from "react";
 
 // Función principal
 function App() {
 
-  // Estado para guardar correo
-  const [correo, setCorreo] = useState("");
+  // Estados formulario equipos
+  const [nombreEquipo, setNombreEquipo] = useState("");
+  const [marca, setMarca] = useState("");
+  const [serialEquipo, setSerialEquipo] = useState("");
+  const [estadoEquipo, setEstadoEquipo] = useState("");
 
-  // Estado para guardar contraseña
-  const [contrasena, setContrasena] = useState("");
+  // Función guardar equipo
+  const guardarEquipo = async (e) => {
 
-  // Función que se ejecuta al enviar formulario
-// Función para iniciar sesión
-const iniciarSesion = async (e) => {
+    // Evitar recarga
+    e.preventDefault();
 
-  // Evita recargar la página
-  e.preventDefault();
+    try {
 
-  try {
+      // Enviar datos al backend Java
+      const respuesta = await fetch(
+        "http://localhost:8081/OpenAlmacenBackend/guardarEquipo",
+        {
 
-    // Enviar datos al backend Java
-    const respuesta = await fetch(
-      "http://localhost:8081/OpenAlmacenBackend/login",
-      {
+          method: "POST",
 
-        method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+          },
 
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded"
-        },
+          // Datos enviados
+          body:
+            `nombreEquipo=${nombreEquipo}
+            &marca=${marca}
+            &serialEquipo=${serialEquipo}
+            &estadoEquipo=${estadoEquipo}`
 
-        // Datos enviados al servlet
-        body:
-          `correo=${correo}&contrasena=${contrasena}`
+        }
+      );
 
-      }
-    );
+      // Convertir respuesta JSON
+      const datos = await respuesta.json();
 
-    // Convertir respuesta JSON
-    const datos = await respuesta.json();
+      // Mostrar mensaje
+      alert(datos.mensaje);
 
-    // Mostrar mensaje
-    alert(datos.mensaje);
+    } catch (error) {
 
-  } catch (error) {
+      console.log("Error:", error);
 
-    console.log("Error:", error);
+    }
 
-  }
-
-};
+  };
 
   // Interfaz visual
   return (
@@ -60,34 +62,54 @@ const iniciarSesion = async (e) => {
       <h1>Open Almacen</h1>
 
       {/* Subtítulo */}
-      <h2>Iniciar Sesión</h2>
+      <h2>Gestión de Equipos</h2>
 
-      {/* Formulario login */}
-      <form onSubmit={iniciarSesion}>
+      {/* Formulario */}
+      <form onSubmit={guardarEquipo}>
 
-        {/* Campo correo */}
+        {/* Nombre equipo */}
         <input
-          type="email"
-          placeholder="Ingrese correo"
-          value={correo}
-          onChange={(e) => setCorreo(e.target.value)}
+          type="text"
+          placeholder="Nombre equipo"
+          value={nombreEquipo}
+          onChange={(e) => setNombreEquipo(e.target.value)}
         />
 
         <br /><br />
 
-        {/* Campo contraseña */}
+        {/* Marca */}
         <input
-          type="password"
-          placeholder="Ingrese contraseña"
-          value={contrasena}
-          onChange={(e) => setContrasena(e.target.value)}
+          type="text"
+          placeholder="Marca"
+          value={marca}
+          onChange={(e) => setMarca(e.target.value)}
         />
 
         <br /><br />
 
-        {/* Botón login */}
+        {/* Serial */}
+        <input
+          type="text"
+          placeholder="Serial equipo"
+          value={serialEquipo}
+          onChange={(e) => setSerialEquipo(e.target.value)}
+        />
+
+        <br /><br />
+
+        {/* Estado */}
+        <input
+          type="text"
+          placeholder="Estado equipo"
+          value={estadoEquipo}
+          onChange={(e) => setEstadoEquipo(e.target.value)}
+        />
+
+        <br /><br />
+
+        {/* Botón guardar */}
         <button type="submit">
-          Ingresar
+          Guardar Equipo
         </button>
 
       </form>
