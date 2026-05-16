@@ -1,10 +1,10 @@
-// Importar hooks de React
+// Importar hooks React
 import { useEffect, useState } from "react";
 
 // Función principal
 function App() {
 
-  // Estados del formulario
+  // Estados formulario
   const [nombreEquipo, setNombreEquipo] = useState("");
   const [marca, setMarca] = useState("");
   const [serialEquipo, setSerialEquipo] = useState("");
@@ -21,7 +21,7 @@ function App() {
 
     try {
 
-      // Petición al backend Java
+      // Petición backend Java
       const respuesta = await fetch(
         "http://localhost:8081/OpenAlmacenBackend/guardarEquipo",
         {
@@ -39,8 +39,14 @@ function App() {
         }
       );
 
-      // Convertir respuesta JSON
-      const datos = await respuesta.json();
+      // Obtener respuesta como texto
+      const texto = await respuesta.text();
+
+      // Mostrar respuesta en consola
+      console.log(texto);
+
+      // Convertir texto a JSON
+      const datos = JSON.parse(texto);
 
       // Mostrar mensaje
       alert(datos.mensaje);
@@ -51,12 +57,14 @@ function App() {
       setSerialEquipo("");
       setEstadoEquipo("");
 
-      // Recargar tabla
+      // Actualizar tabla
       listarEquipos();
 
     } catch (error) {
 
       console.log("Error:", error);
+
+      alert("Error de conexión con backend");
 
     }
 
@@ -67,19 +75,19 @@ function App() {
 
     try {
 
-      // Consumir servlet
+      // Consumir servlet listar
       const respuesta = await fetch(
         "http://localhost:8081/OpenAlmacenBackend/listarEquipos"
       );
 
-      // Convertir a JSON
-      const datos = await respuesta.json();
+      // Convertir respuesta
+      const texto = await respuesta.text();
 
-      // Guardar datos en estado
+      // Convertir JSON
+      const datos = JSON.parse(texto);
+
+      // Guardar lista
       setEquipos(datos);
-
-      // Ver datos en consola
-      console.log(datos);
 
     } catch (error) {
 
@@ -89,7 +97,7 @@ function App() {
 
   };
 
-  // Ejecutar al iniciar
+  // Ejecutar automáticamente
   useEffect(() => {
 
     listarEquipos();
@@ -110,7 +118,7 @@ function App() {
       {/* Formulario */}
       <form onSubmit={guardarEquipo}>
 
-        {/* Nombre */}
+        {/* Nombre equipo */}
         <input
           type="text"
           placeholder="Nombre equipo"
@@ -150,7 +158,7 @@ function App() {
 
         <br /><br />
 
-        {/* Botón */}
+        {/* Botón guardar */}
         <button type="submit">
           Guardar Equipo
         </button>
