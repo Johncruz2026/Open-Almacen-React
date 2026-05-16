@@ -5,113 +5,120 @@ import { useEffect, useState } from "react";
 function App() {
 
   // =========================
-  // ESTADOS DEL FORMULARIO
+  // ESTADOS FORMULARIO
   // =========================
 
-  // Estado nombre equipo
+  // ID equipo
+  const [id, setId] = useState("");
+
+  // Nombre equipo
   const [nombreEquipo, setNombreEquipo] = useState("");
 
-  // Estado marca
+  // Marca
   const [marca, setMarca] = useState("");
 
-  // Estado serial
+  // Serial
   const [serialEquipo, setSerialEquipo] = useState("");
 
-  // Estado equipo
+  // Estado
   const [estadoEquipo, setEstadoEquipo] = useState("");
 
-  // Estado lista equipos
+  // Lista equipos
   const [equipos, setEquipos] = useState([]);
 
+  // Detectar modo edición
+  const [modoEdicion, setModoEdicion] = useState(false);
+
   // =========================
-  // FUNCIÓN GUARDAR EQUIPO
+  // GUARDAR EQUIPO
   // =========================
 
   const guardarEquipo = async (e) => {
 
-    // Evitar recargar página
+    // Evitar recarga
     e.preventDefault();
 
     try {
 
-      // Petición al backend Java
+      // URL según modo
+      let url = "";
+
+      if (modoEdicion) {
+
+        url = "http://localhost:8081/OpenAlmacenBackend/actualizarEquipo";
+
+      } else {
+
+        url = "http://localhost:8081/OpenAlmacenBackend/guardarEquipo";
+
+      }
+
+      // Petición backend
       const respuesta = await fetch(
-        "http://localhost:8081/OpenAlmacenBackend/guardarEquipo",
+        url,
         {
 
-          // Método HTTP
           method: "POST",
 
-          // Tipo datos enviados
           headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           },
 
-          // Datos enviados al servlet
+          // Datos enviados
           body:
-            `nombreEquipo=${nombreEquipo}&marca=${marca}&serialEquipo=${serialEquipo}&estadoEquipo=${estadoEquipo}`
+            `id=${id}&nombreEquipo=${nombreEquipo}&marca=${marca}&serialEquipo=${serialEquipo}&estadoEquipo=${estadoEquipo}`
 
         }
       );
 
-      // Obtener respuesta como texto
+      // Obtener respuesta
       const texto = await respuesta.text();
 
-      // Mostrar respuesta consola
-      console.log(texto);
-
-      // Convertir texto JSON
+      // Convertir JSON
       const datos = JSON.parse(texto);
 
       // Mostrar mensaje
       alert(datos.mensaje);
 
       // Limpiar formulario
-      setNombreEquipo("");
-      setMarca("");
-      setSerialEquipo("");
-      setEstadoEquipo("");
+      limpiarFormulario();
 
       // Actualizar tabla
       listarEquipos();
 
     } catch (error) {
 
-      // Mostrar error consola
       console.log("Error:", error);
 
-      // Mostrar error usuario
-      alert("Error de conexión con backend");
+      alert("Error de conexión");
 
     }
 
   };
 
   // =========================
-  // FUNCIÓN LISTAR EQUIPOS
+  // LISTAR EQUIPOS
   // =========================
 
   const listarEquipos = async () => {
 
     try {
 
-      // Consumir servlet listar
+      // Consumir backend
       const respuesta = await fetch(
         "http://localhost:8081/OpenAlmacenBackend/listarEquipos"
       );
 
-      // Obtener respuesta
+      // Convertir respuesta
       const texto = await respuesta.text();
 
-      // Convertir JSON
       const datos = JSON.parse(texto);
 
-      // Guardar datos en estado
+      // Guardar lista
       setEquipos(datos);
 
     } catch (error) {
 
-      // Mostrar error consola
       console.log("Error:", error);
 
     }
@@ -119,36 +126,33 @@ function App() {
   };
 
   // =========================
-  // FUNCIÓN ELIMINAR EQUIPO
+  // ELIMINAR EQUIPO
   // =========================
 
   const eliminarEquipo = async (id) => {
 
     try {
 
-      // Petición backend eliminar
+      // Petición backend
       const respuesta = await fetch(
         "http://localhost:8081/OpenAlmacenBackend/eliminarEquipo",
         {
 
-          // Método HTTP
           method: "POST",
 
-          // Tipo contenido
           headers: {
             "Content-Type": "application/x-www-form-urlencoded"
           },
 
-          // Enviar id
+          // Enviar ID
           body: `id=${id}`
 
         }
       );
 
-      // Obtener respuesta
+      // Convertir respuesta
       const texto = await respuesta.text();
 
-      // Convertir JSON
       const datos = JSON.parse(texto);
 
       // Mostrar mensaje
@@ -159,10 +163,43 @@ function App() {
 
     } catch (error) {
 
-      // Mostrar error
       console.log("Error:", error);
 
     }
+
+  };
+
+  // =========================
+  // EDITAR EQUIPO
+  // =========================
+
+  const editarEquipo = (equipo) => {
+
+    // Activar modo edición
+    setModoEdicion(true);
+
+    // Cargar datos formulario
+    setId(equipo.id);
+    setNombreEquipo(equipo.nombreEquipo);
+    setMarca(equipo.marca);
+    setSerialEquipo(equipo.serialEquipo);
+    setEstadoEquipo(equipo.estadoEquipo);
+
+  };
+
+  // =========================
+  // LIMPIAR FORMULARIO
+  // =========================
+
+  const limpiarFormulario = () => {
+
+    setId("");
+    setNombreEquipo("");
+    setMarca("");
+    setSerialEquipo("");
+    setEstadoEquipo("");
+
+    setModoEdicion(false);
 
   };
 
@@ -172,29 +209,28 @@ function App() {
 
   useEffect(() => {
 
-    // Cargar equipos automáticamente
     listarEquipos();
 
   }, []);
 
   // =========================
-  // INTERFAZ VISUAL
+  // INTERFAZ
   // =========================
 
   return (
 
     <div>
 
-      {/* Título principal */}
+      {/* Título */}
       <h1>Open Almacen</h1>
 
       {/* Subtítulo */}
       <h2>Gestión de Equipos</h2>
 
-      {/* Formulario equipos */}
+      {/* Formulario */}
       <form onSubmit={guardarEquipo}>
 
-        {/* Campo nombre */}
+        {/* Nombre */}
         <input
           type="text"
           placeholder="Nombre equipo"
@@ -204,7 +240,7 @@ function App() {
 
         <br /><br />
 
-        {/* Campo marca */}
+        {/* Marca */}
         <input
           type="text"
           placeholder="Marca"
@@ -214,7 +250,7 @@ function App() {
 
         <br /><br />
 
-        {/* Campo serial */}
+        {/* Serial */}
         <input
           type="text"
           placeholder="Serial equipo"
@@ -224,7 +260,7 @@ function App() {
 
         <br /><br />
 
-        {/* Campo estado */}
+        {/* Estado */}
         <input
           type="text"
           placeholder="Estado equipo"
@@ -234,22 +270,34 @@ function App() {
 
         <br /><br />
 
-        {/* Botón guardar */}
+        {/* Botón dinámico */}
         <button type="submit">
-          Guardar Equipo
+
+          {modoEdicion ? "Actualizar Equipo" : "Guardar Equipo"}
+
+        </button>
+
+        <br /><br />
+
+        {/* Botón limpiar */}
+        <button
+          type="button"
+          onClick={limpiarFormulario}
+        >
+
+          Limpiar
+
         </button>
 
       </form>
 
       <hr />
 
-      {/* Título tabla */}
+      {/* Tabla */}
       <h2>Lista de Equipos</h2>
 
-      {/* Tabla equipos */}
       <table border="1">
 
-        {/* Encabezado */}
         <thead>
 
           <tr>
@@ -265,7 +313,6 @@ function App() {
 
         </thead>
 
-        {/* Cuerpo tabla */}
         <tbody>
 
           {/* Recorrer equipos */}
@@ -279,13 +326,27 @@ function App() {
               <td>{equipo.serialEquipo}</td>
               <td>{equipo.estadoEquipo}</td>
 
-              {/* Botón eliminar */}
+              {/* Acciones */}
               <td>
 
+                {/* Editar */}
+                <button
+                  onClick={() => editarEquipo(equipo)}
+                >
+
+                  Editar
+
+                </button>
+
+                {" "}
+
+                {/* Eliminar */}
                 <button
                   onClick={() => eliminarEquipo(equipo.id)}
                 >
+
                   Eliminar
+
                 </button>
 
               </td>
